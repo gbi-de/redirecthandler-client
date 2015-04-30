@@ -1,2 +1,2 @@
-# redirecthandler-client
-Client implementations for the Redirect Handler 
+# redirecthandler-client-java-tomcat
+Client implementation for the Redirect Handler for any Servlet Container such as Apache Tomcat.
