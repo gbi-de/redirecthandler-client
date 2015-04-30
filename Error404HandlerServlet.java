@@ -30,13 +30,13 @@ import org.apache.log4j.Logger;
  * You may configure your web.xml as follows, to integrate this servlet.
  * 
  * <br>
- * <b>parameters</b> <br>
+ * <b>parameters:</b> <br>
  * <b>xGbiKey</b> license key for api access<br>
  * <b>redirectProcessorUrls</b> comma separated list of redirect processor urls<br>
  * <b>timeout</b> redirect request timeout in ms<br>
  * <b>default404Page</b> the 404 page if no redirect available<br>
  * <br>
- * <b>sample</b>
+ * <b>sample:</b>
  * 
  * <pre>
  * {@code
@@ -70,6 +70,13 @@ import org.apache.log4j.Logger;
  * </error-page>
  * }
  * </pre>
+ * 
+ * <br>
+ * <b>testes with the following dependencies:</b> <br>
+ * apache commons-lang 2.6</b> <br>
+ * apache commons-validator 1.3.1</b> <br>
+ * apache httpclient 4.3.1<b></b> <br>
+ * <b>log4h 1.2.14</b>
  * 
  * @author hao.jin, kai.faulstich
  * 
