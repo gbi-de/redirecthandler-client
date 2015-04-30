@@ -72,7 +72,7 @@ import org.apache.log4j.Logger;
  * </pre>
  * 
  * <br>
- * <b>testes with the following dependencies:</b> <br>
+ * <b>tested with the following dependencies:</b> <br>
  * apache commons-lang 2.6</b> <br>
  * apache commons-validator 1.3.1</b> <br>
  * apache httpclient 4.3.1<b></b> <br>
