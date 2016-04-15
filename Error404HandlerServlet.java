@@ -1,17 +1,3 @@
-/*
- * Copyright 2015 Goldbach Interactive (Germany) AG
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package de.goldbachinteractive.gbi.redirecthandler.client;
 
 import java.io.IOException;
@@ -29,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.validator.UrlValidator;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -192,6 +178,7 @@ public class Error404HandlerServlet extends HttpServlet {
 		String scheme = request.getScheme();
 		// to use absolute url with scheme
 		String requestUri = scheme + "://" + host + path;
+		// the url must be encoded
 		requestUri = URLEncoder.encode(requestUri, ENCODING_UTF8);
 
 		// copy redirect dispatcher URLs, because we manipulate this list for
@@ -215,19 +202,8 @@ public class Error404HandlerServlet extends HttpServlet {
 			}
 			urlCount--;
 		}
-
 		// we did not found a redirect, so use the default 404 page, configured
-		if (default404Page != null) {
-			try {
-				request.getRequestDispatcher(default404Page).forward(request, response);
-			}
-			catch (Exception e) {
-				// ensure your default 404 page is always up
-			}
-		}
-		else {
-			// you should have a default 404 page
-		}
+		redirectDefault404Page(request, response);
 	}
 
 	/**
@@ -275,17 +251,39 @@ public class Error404HandlerServlet extends HttpServlet {
 			CloseableHttpResponse response = httpClient.execute(httpGet);
 			int statusCode = response.getStatusLine().getStatusCode();
 			logger.info(String.format("status code :%d", statusCode));
-			if (statusCode == 301) {
-				// if status code is 301, the Location header of response is set
+			if (statusCode >= 300 && statusCode < 400) {
+				// if status code is 3XX, the Location header of response is set
 				String location = response.getHeaders("Location")[0].getValue();
 				resp.sendRedirect(location);
 				return true;
 			}
 		}
 		catch (Exception e) {
-			logger.error(String.format("error while trying to request redirect:[%s]", e.getMessage()));
+			logger.error(String.format("error while trying to request redirect:[%s]", e.getMessage()), e);
 		}
 		return false;
+	}
+
+	/**
+	 * if there is no redirect found, use the configured default 404 page
+	 * 
+	 * @param req
+	 *            The original request.
+	 * @param resp
+	 *            The original response.
+	 */
+	private void redirectDefault404Page(HttpServletRequest req, HttpServletResponse resp) {
+		if (default404Page != null) {
+			try {
+				req.getRequestDispatcher(default404Page).forward(req, resp);
+			}
+			catch (Exception e) {
+				// ensure your default 404 page is always up
+			}
+		}
+		else {
+			// you should have a default 404 page
+		}
 	}
 
 	/**
@@ -307,14 +305,13 @@ public class Error404HandlerServlet extends HttpServlet {
 			return urls;
 		}
 
-		UrlValidator urlValidator = new UrlValidator();
+		UrlValidator urlValidator = new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS);
 
-		// check duplicates, while using always lower case string
+		// check duplicates
 		for (String currentString : stringArray) {
 
-			String lowerString = currentString.toLowerCase();
-			if (urlValidator.isValid(lowerString) && !urls.contains(lowerString)) {
-				urls.add(lowerString);
+			if (urlValidator.isValid(currentString) && !urls.contains(currentString)) {
+				urls.add(currentString);
 			}
 		}
 		return urls;
